@@ -140,17 +140,17 @@ func (i *InfluxDB) Connect() error {
 		i.serializer.SetFieldTypeSupport(influx.UintSupport)
 	}
 
-	for _, u := range urls {
-		u, err := url.Parse(u)
+	for _, loc := range urls {
+		u, err := url.Parse(loc)
 		if err != nil {
-			return fmt.Errorf("error parsing url [%s]: %v", u, err)
+			return fmt.Errorf("error parsing url [%q]: %v", loc, err)
 		}
 
 		var proxy *url.URL
 		if len(i.HTTPProxy) > 0 {
 			proxy, err = url.Parse(i.HTTPProxy)
 			if err != nil {
-				return fmt.Errorf("error parsing proxy_url [%s]: %v", proxy, err)
+				return fmt.Errorf("error parsing proxy_url [%q]: %v", proxy, err)
 			}
 		}
 
@@ -170,7 +170,7 @@ func (i *InfluxDB) Connect() error {
 
 			i.clients = append(i.clients, c)
 		default:
-			return fmt.Errorf("unsupported scheme [%s]: %q", u, u.Scheme)
+			return fmt.Errorf("unsupported scheme [%q]: %q", u, u.Scheme)
 		}
 	}
 
@@ -209,14 +209,14 @@ func (i *InfluxDB) Write(metrics []telegraf.Metric) error {
 				if apiError.Type == DatabaseNotFound {
 					err := client.CreateDatabase(ctx)
 					if err != nil {
-						log.Printf("E! [outputs.influxdb] when writing to [%s]: database %q not found and failed to recreate",
+						log.Printf("E! [outputs.influxdb] when writing to [%q]: database %q not found and failed to recreate",
 							client.URL(), client.Database())
 					}
 				}
 			}
 		}
 
-		log.Printf("E! [outputs.influxdb]: when writing to [%s]: %v", client.URL(), err)
+		log.Printf("E! [outputs.influxdb]: when writing to [%q]: %v", client.URL(), err)
 	}
 
 	return errors.New("could not write any address")
@@ -231,7 +231,7 @@ func (i *InfluxDB) udpClient(url *url.URL) (Client, error) {
 
 	c, err := i.CreateUDPClientF(config)
 	if err != nil {
-		return nil, fmt.Errorf("error creating UDP client [%s]: %v", url, err)
+		return nil, fmt.Errorf("error creating UDP client [%q]: %v", url, err)
 	}
 
 	return c, nil
@@ -261,13 +261,13 @@ func (i *InfluxDB) httpClient(ctx context.Context, url *url.URL, proxy *url.URL)
 
 	c, err := i.CreateHTTPClientF(config)
 	if err != nil {
-		return nil, fmt.Errorf("error creating HTTP client [%s]: %v", url, err)
+		return nil, fmt.Errorf("error creating HTTP client [%q]: %v", url, err)
 	}
 
 	if !i.SkipDatabaseCreation {
 		err = c.CreateDatabase(ctx)
 		if err != nil {
-			log.Printf("W! [outputs.influxdb] when writing to [%s]: database %q creation failed: %v",
+			log.Printf("W! [outputs.influxdb] when writing to [%q]: database %q creation failed: %v",
 				c.URL(), c.Database(), err)
 		}
 	}
