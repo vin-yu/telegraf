@@ -365,8 +365,8 @@ func (a *Agent) Run(shutdown chan struct{}) error {
 		a.Config.Agent.Hostname, a.Config.Agent.FlushInterval.Duration)
 
 	// channel shared between all input threads for accumulating metrics
-	metricC := make(chan telegraf.Metric, 100)
-	aggC := make(chan telegraf.Metric, 100)
+	metricC := make(chan telegraf.Metric, 10000)
+	aggC := make(chan telegraf.Metric, 10000)
 
 	// Start all ServicePlugins
 	for _, input := range a.Config.Inputs {
