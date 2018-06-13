@@ -352,6 +352,9 @@ func (h *HTTPListener) parse(b []byte, t time.Time, precision string) error {
 	}
 
 	for _, m := range metrics {
+		if m.Time().UnixNano() < 0 {
+			log.Printf("W! [inputs.http_listener] Parsed metric with negative timestamp: %q: parsed time: %q, now: %q", b, m.Time().UTC(), t.UTC())
+		}
 		h.acc.AddFields(m.Name(), m.Fields(), m.Tags(), m.Time())
 	}
 
